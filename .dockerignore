@@ -1,0 +1,59 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Documentation
+README.md
+*.md
+docs/
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python/uv cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.uv/
+.uv-cache/
+uv.lock
+
+# Hermes local data (never commit)
+.hermes/
+hermes-data/
+*.db
+*.sqlite
+*.sqlite3
+logs/
+
+# Secrets (never commit)
+.env
+.env.*
+*.key
+*.pem
+*.crt
+
+# Test/coverage
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
