@@ -1,7 +1,7 @@
 diff --git a/plugins/platforms/telegram/adapter.py b/plugins/platforms/telegram/adapter.py
 --- a/plugins/platforms/telegram/adapter.py
 +++ b/plugins/platforms/telegram/adapter.py
-@@ -1338,11 +1338,16 @@
+@@ -1338,5 +1338,9 @@
          return any(_scoped_gate_env(key).strip() for key in keys)
  
 +    def _telegram_fallback_transport_allowed(self) -> bool:
