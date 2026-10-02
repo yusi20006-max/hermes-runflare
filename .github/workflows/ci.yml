@@ -12,6 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install test runner
+        run: python3 -m pip install --disable-pip-version-check pytest
+
       - name: Run deployment regression tests
         run: python3 -m pytest -q tests/test_bale_deployment.py
 
