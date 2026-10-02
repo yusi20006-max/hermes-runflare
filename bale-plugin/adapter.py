@@ -5,7 +5,7 @@ reuse Hermes' full Telegram adapter and override only what differs:
 
   * API base URL  -> https://tapi.bale.ai/bot   (set via PlatformConfig.extra.base_url)
   * Bot token     -> BALE_BOT_TOKEN             (instead of TELEGRAM_BOT_TOKEN)
-  * Allowed users -> BALE_ALLOWED_USERS         (falls back to TELEGRAM_ALLOWED_USERS)
+  * Allowed users -> BALE_ALLOWED_USERS / BALE_CHAT_ID (Bale-scoped only)
 
 All slash commands, the command list, session binding, inline keyboards, media,
 voice, and delivery behavior are inherited unchanged from TelegramAdapter — the
