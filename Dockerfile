@@ -18,7 +18,7 @@ RUN curl -LsSf https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/u
 ENV HERMES_HOME=/opt/hermes
 ENV HERMES_AGENT_DIR=/opt/hermes/hermes-agent
 
-ARG HERMES_TAG=v2026.8.3
+ARG HERMES_TAG=v2026.8.27
 ARG HERMES_REPO=https://github.com/NousResearch/hermes-agent.git
 
 RUN git clone --depth 1 --branch ${HERMES_TAG} ${HERMES_REPO} ${HERMES_AGENT_DIR}
