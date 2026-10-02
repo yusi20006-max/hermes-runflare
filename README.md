@@ -1,6 +1,6 @@
 # Hermes Agent Gateway — Runflare Free Deployment
 
-Production Docker deployment of **Hermes Agent v0.20.0 (v2026.8.3)** for Runflare Free tier.
+Production Docker deployment of **Hermes Agent v0.20.6 (v2026.8.27)** for Runflare Free tier, with the locally validated Bale platform integration.
 
 ## Quick Start
 
@@ -53,7 +53,12 @@ Add these in Runflare Portal → Service `hermes-gate` → **Environment Variabl
 | Variable | Required | Description | Example |
 |----------|----------|-------------|---------|
 | `TELEGRAM_BOT_TOKEN` | **YES** | Bot token from @BotFather | `123456789:ABCdefGHIjklMNOpqrSTUvwxYZ` |
-| `TELEGRAM_ALLOWED_USERS` | **YES** | Your Telegram user ID(s) from @userinfobot (comma-separated) | `123456789` or `123456789,987654321` |
+| `TELEGRAM_ALLOWED_USERS` | **YES** | Your Telegram user ID(s) (comma-separated) | `123456789` or `123456789,987654321` |
+| `BALE_BOT_TOKEN` | **If Bale enabled** | Bale bot token | Set as a Runflare secret |
+| `BALE_ALLOWED_USERS` | Recommended | Comma-separated Bale user IDs allowed to chat | `1041795208` |
+| `BALE_CHAT_ID` | Optional | Additional Bale chat ID allowed to chat | `1041795208` |
+| `BALE_ALLOW_ALL_USERS` | Optional | Truthy value allows all Bale users | `false` |
+| `BALE_HOME_CHANNEL` | Optional | Default Bale chat ID for cron/notification delivery | `1041795208` |
 | `TELEGRAM_WEBHOOK_URL` | No | Public HTTPS URL for webhook mode (enables webhook instead of long-polling) | `https://hermes-gate.runflare.app/telegram` |
 | `TELEGRAM_WEBHOOK_PORT` | No* | Local listen port for webhook server | `8443` |
 | `TELEGRAM_WEBHOOK_SECRET` | No* | Secret token for webhook verification (generate: `openssl rand -hex 32`) | `a1b2c3d4...` |
@@ -62,6 +67,17 @@ Add these in Runflare Portal → Service `hermes-gate` → **Environment Variabl
 | `OPENAI_API_KEY` | Alternative | For direct OpenAI access | `sk-...` |
 
 \* Required only if `TELEGRAM_WEBHOOK_URL` is set.
+
+### Bale configuration
+
+The image includes the Bale plugin and enables the Bale platform at container startup. The Bale integration is isolated from Telegram in two ways:
+
+- Bale authorization reads only `BALE_ALLOWED_USERS`, `BALE_CHAT_ID`, and `BALE_ALLOW_ALL_USERS`.
+- Bale never activates Telegram's DoH/fallback-IP transport; its Bot API endpoint remains `https://tapi.bale.ai/bot`.
+
+Do **not** put `BALE_BOT_TOKEN` in this repository. Configure it as a Runflare secret.
+
+The integration was validated locally with a real Bale round-trip before this Runflare repository change.
 
 ### Getting Telegram Credentials
 
@@ -145,6 +161,14 @@ After deployment, verify in Runflare logs:
   [INFO] Telegram gateway: polling mode
   [INFO] Gateway running. Press Ctrl+C to stop.
 ```
+
+### Test Bale Integration
+
+1. Configure `BALE_BOT_TOKEN` and `BALE_ALLOWED_USERS` in Runflare.
+2. Restart the service.
+3. Message the Bale bot from an allowed account.
+4. Verify the logs contain Bale connection/readiness without Telegram fallback-IP messages.
+5. Confirm the bot replies in Bale.
 
 ### Test Telegram Integration
 

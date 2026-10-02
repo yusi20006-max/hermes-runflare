@@ -1,0 +1,31 @@
+diff --git a/plugins/platforms/telegram/adapter.py b/plugins/platforms/telegram/adapter.py
+--- a/plugins/platforms/telegram/adapter.py
++++ b/plugins/platforms/telegram/adapter.py
+@@ -1338,5 +1338,9 @@
+         return any(_scoped_gate_env(key).strip() for key in keys)
+ 
++    def _telegram_fallback_transport_allowed(self) -> bool:
++        """Return whether this adapter may use Telegram fallback transport."""
++        return True
++
+     def _should_pass_unauthorized_dm_for_pairing(self, source) -> bool:
+         """Return True when an unauthorized DM must still reach gateway pairing.
+ 
+@@ -4520,7 +4520,7 @@
+             fallback_ips = self._fallback_ips()
+             if disable_fallback:
+                 fallback_ips = []
+-            if not fallback_ips and not disable_fallback:
++            if self._telegram_fallback_transport_allowed() and not fallback_ips and not disable_fallback:
+                 discovery_timeout = self._env_float_clamped(
+                     "HERMES_TELEGRAM_FALLBACK_DISCOVERY_TIMEOUT",
+                     5.0,
+@@ -4554,7 +4554,7 @@
+ 
+             proxy_targets = ["api.telegram.org", *fallback_ips]
+             proxy_url = resolve_proxy_url("TELEGRAM_PROXY", target_hosts=proxy_targets)
+-            if fallback_ips and not proxy_url and not disable_fallback:
++            if self._telegram_fallback_transport_allowed() and fallback_ips and not proxy_url and not disable_fallback:
+                 logger.info(
+                     "[%s] Telegram fallback IPs active: %s",
+                     self.name,
