@@ -25,6 +25,9 @@ RUN git clone --depth 1 --branch ${HERMES_TAG} ${HERMES_REPO} ${HERMES_AGENT_DIR
 
 WORKDIR ${HERMES_AGENT_DIR}
 
+COPY patches/hermes-bale.patch /tmp/hermes-bale.patch
+RUN git apply --check /tmp/hermes-bale.patch && git apply /tmp/hermes-bale.patch && rm /tmp/hermes-bale.patch
+
 RUN uv sync --frozen --no-dev
 
 FROM python:3.11-slim AS runtime
@@ -40,8 +43,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
 COPY --from=builder /opt/hermes/hermes-agent /opt/hermes/hermes-agent
+COPY bale-plugin /opt/hermes/bale-plugin
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-RUN mkdir -p /opt/data && \
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p /opt/data && \
     chown -R hermes:hermes /opt/data /opt/hermes
 
 USER hermes
@@ -58,4 +63,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD pgrep -f "hermes gateway" || exit 1
 
-ENTRYPOINT ["hermes", "gateway", "run"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
