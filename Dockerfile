@@ -1,7 +1,5 @@
-# Hermes Agent v0.20.0 (v2026.8.3) - Production Dockerfile for Runflare Free
-# Builds Hermes from source using uv, runs gateway in foreground
-
-FROM python:3.12-slim AS builder
+# Hermes Agent v0.20.0 (v2026.8.3) - Runflare Free
+FROM python:3.11-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
@@ -18,7 +16,7 @@ RUN curl -LsSf https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/u
     && chmod +x /usr/local/bin/uv
 
 ENV HERMES_HOME=/opt/hermes
-ENV HERMES_AGENT_DIR=${HERMES_HOME}/hermes-agent
+ENV HERMES_AGENT_DIR=/opt/hermes/hermes-agent
 
 ARG HERMES_TAG=v2026.8.3
 ARG HERMES_REPO=https://github.com/NousResearch/hermes-agent.git
@@ -27,10 +25,9 @@ RUN git clone --depth 1 --branch ${HERMES_TAG} ${HERMES_REPO} ${HERMES_AGENT_DIR
 
 WORKDIR ${HERMES_AGENT_DIR}
 
-# Hermes source builds require the project to be installed editable.
 RUN uv sync --frozen --no-dev
 
-FROM python:3.12-slim AS runtime
+FROM python:3.11-slim AS runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
@@ -42,23 +39,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && useradd --create-home --shell /bin/bash --uid 1000 hermes
 
 COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
+COPY --from=builder /opt/hermes/hermes-agent /opt/hermes/hermes-agent
 
-ENV HERMES_HOME=/opt/hermes
-ENV HERMES_AGENT_DIR=${HERMES_HOME}/hermes-agent
-COPY --from=builder ${HERMES_AGENT_DIR} ${HERMES_AGENT_DIR}
-
-RUN mkdir -p /opt/data && chown -R hermes:hermes /opt/data /opt/hermes
+RUN mkdir -p /opt/data && \
+    chown -R hermes:hermes /opt/data /opt/hermes
 
 USER hermes
 WORKDIR /opt/data
 
+ENV HERMES_AGENT_DIR=/opt/hermes/hermes-agent
 ENV PATH="${HERMES_AGENT_DIR}/.venv/bin:${PATH}"
 ENV HERMES_HOME=/opt/data
 ENV HERMES_GATEWAY_NO_SUPERVISE=1
+ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD pgrep -f "hermes gateway run" || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD pgrep -f "hermes gateway" || exit 1
 
 ENTRYPOINT ["hermes", "gateway", "run"]
